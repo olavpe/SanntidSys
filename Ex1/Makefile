@@ -24,5 +24,7 @@ $(TARGET): $(OBJECTS)
 %.o : %.c
 	gcc $(CFLAGS) -c -o $@ $<
 # cleaning
+
+.PHONY: clean
 clean:
 	rm -f $(TARGET) $(OBJECTS)
