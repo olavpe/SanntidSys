@@ -82,44 +82,19 @@ long array_length(Array a){
 
 void array_reserve(Array* a, long capacity){
 
-	long* newData = malloc(sizeof(long)*capacity);
-	printf("Before memcpy\n");
-	printf("newData: %p\n", newData);
-	printf("a->data: %p\n", a->data);
-	printf("size of... : %ld\n", (sizeof(long)*(capacity-1)));
-	
-	memcpy(newData,a->data,(sizeof(long)*(capacity-1)));
-	printf("After memcpy\n");
+	long* newData = malloc(sizeof(long)*(capacity));
+	memcpy(newData,a->data,(sizeof(long)*(capacity/2)));
 	free(a->data);
 	a->data = newData;
 	a->capacity = capacity;
-	printf("ARRAY SIZE FINAL: %ld\n",a->capacity);
-	
-	/*
-	printf("INSIDE RESERVE \n");
-	Array newArray = array_new(capacity);
-	printf("address a: %p \n", a);
-	printf("address newArray: %p \n", &newArray);
-		for(Array b = array_save(*a); !array_empty(b); array_popFront(&b)){
-			printf("inside for\n");
-        	array_insertBack(&newArray, b.data[b.front]);
-        	printf("after insertback\n");
-    	}
-    array_destroy(*a);
-	a = &newArray;
-	printf("address new a: %p \n", a);
-	*/
 }
 
 
 // Modifiers
 
 void array_insertBack(Array* a, long stuff){
-	printf("a back: %ld \n",a->back);
-	printf("a capacity: %ld \n",a->capacity);
 	if (a->back >= a->capacity){
-		printf("inside ifstatement\n");
-		array_reserve(a,((a->capacity)+1));
+		array_reserve(a,((a->capacity)*2));
 	}
 	a->data[a->back] = stuff;
 	a->back++;

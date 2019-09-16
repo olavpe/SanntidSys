@@ -24,10 +24,14 @@ int main(int argc, char* argv[])
 	array_insertBack(&newArray,5);
 	array_insertBack(&newArray,4);
 	array_insertBack(&newArray,5);
-	array_print(newArray);
 	array_insertBack(&newArray,6);
-	array_print(newArray);
-	printf("ARRAY SIZE FINAL: %ld\n",newArray.capacity);
+	
+	
+	for(long i=0; i < 1000*1000*1000;i++){
+		array_insertBack(&newArray,i);
+	}
+	
+	
 	array_destroy(newArray);
 	return 0;
 }
