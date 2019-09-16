@@ -5,36 +5,38 @@
 
 #include "array.h"
 
+
 // Construction / Destruction
 
-Array array_new(long capacity) {
+Array array_new(long capacity){
     assert(capacity > 0);
-    return (Array){malloc(sizeof(long) * capacity), 0, 0, capacity};
+    return (Array){malloc(sizeof(long)*capacity), 0, 0, capacity};
 }
 
-void array_destroy(Array a) {
+void array_destroy(Array a){
     free(a.data);
 }
 
+
 // Primitives
 
-long array_empty(Array a) {
+long array_empty(Array a){
     return a.back <= a.front;
 }
 
-long array_front(Array a) {
+long array_front(Array a){
     return a.data[a.front];
 }
 
-long array_back(Array a) {
+long array_back(Array a){
     return a.data[a.back - 1];
 }
 
-void array_popFront(Array *a) {
+void array_popFront(Array* a){
     a->front++;
 }
 
-void array_popBack(Array *a) {
+void array_popBack(Array* a){
     a->back--;
 }
 
@@ -42,27 +44,28 @@ Array array_save(Array a){
     return (Array){a.data, a.front, a.back, a.capacity};
 }
 
+
 // Iteration
 
 void array_foreach(Array a, void fn(long)){
-    for (Array b = array_save(a); !array_empty(b); array_popFront(&b)) {
+    for(Array b = array_save(a); !array_empty(b); array_popFront(&b)){
         fn(array_front(b));
     }
 }
 
-void array_foreachReverse(Array a, void fn(long)) {
-    for (Array b = array_save(a); !array_empty(b); array_popBack(&b)) {
+void array_foreachReverse(Array a, void fn(long)){
+    for(Array b = array_save(a); !array_empty(b); array_popBack(&b)){
         fn(array_back(b));
     }
 }
 
-static void _array_printSingleLongHelper(long i) {
+static void _array_printSingleLongHelper(long i){
     printf(", %ld", i);
 }
 
-void array_print(Array a) {
+void array_print(Array a){
     printf("Array:{");
-    if (!array_empty(a)) {
+    if(!array_empty(a)){
         printf("%ld", array_front(a));
         array_popFront(&a);
     }
@@ -70,16 +73,55 @@ void array_print(Array a) {
     printf("}\n");
 }
 
+
 // Capacity
 
-long array_length(Array a) {
+long array_length(Array a){
     return a.back - a.front;
 }
 
-void array_reserve(Array *a, long capacity) {
+void array_reserve(Array* a, long capacity){
+
+	long* newData = malloc(sizeof(long)*capacity);
+	printf("Before memcpy\n");
+	printf("newData: %p\n", newData);
+	printf("a->data: %p\n", a->data);
+	printf("size of... : %ld\n", (sizeof(long)*(capacity-1)));
+	
+	memcpy(newData,a->data,(sizeof(long)*(capacity-1)));
+	printf("After memcpy\n");
+	free(a->data);
+	a->data = newData;
+	a->capacity = capacity;
+	printf("ARRAY SIZE FINAL: %ld\n",a->capacity);
+	
+	/*
+	printf("INSIDE RESERVE \n");
+	Array newArray = array_new(capacity);
+	printf("address a: %p \n", a);
+	printf("address newArray: %p \n", &newArray);
+		for(Array b = array_save(*a); !array_empty(b); array_popFront(&b)){
+			printf("inside for\n");
+        	array_insertBack(&newArray, b.data[b.front]);
+        	printf("after insertback\n");
+    	}
+    array_destroy(*a);
+	a = &newArray;
+	printf("address new a: %p \n", a);
+	*/
 }
+
 
 // Modifiers
 
-void array_insertBack(Array *a, long stuff) {
+void array_insertBack(Array* a, long stuff){
+	printf("a back: %ld \n",a->back);
+	printf("a capacity: %ld \n",a->capacity);
+	if (a->back >= a->capacity){
+		printf("inside ifstatement\n");
+		array_reserve(a,((a->capacity)+1));
+	}
+	a->data[a->back] = stuff;
+	a->back++;
 }
+
