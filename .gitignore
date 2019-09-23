@@ -1,0 +1,5 @@
+# Ignoring any files with the following extensions
+*.o
+
+# Ignoring these build
+build/
