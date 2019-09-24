@@ -1,4 +1,4 @@
-//usr/bin/clang "$0" -o double_checked -std=gnu11 -g -O3 -lpthread && exec ./double_checked
+// /usr/bin/clang "$0" -o double_checked -std=gnu11 -g -O3 -lpthread && exec ./double_checked
 #include <stdio.h>
 #include <semaphore.h>
 #include <pthread.h>
