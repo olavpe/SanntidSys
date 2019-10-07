@@ -125,14 +125,15 @@ static void responseTask_C(void* args){
 	struct responseTaskArgs a = *(struct responseTaskArgs*)args;
 	
 	while(1){
-		printf("PIN: %d \n\r", a.pin.test);
+		//printf("PIN: %d \n\r", a.pin.test);
 		//printf("PIN C !!: %d \n\r", TEST_C);
 		if(gpio_pin_is_low(a.pin.test)){
-			gpio_set_pin_low(a.pin.response);
-			vTaskDelay(1);
 			if (a.pin.test == TEST_C){
 				busy_delay_ms(3);
 			}
+			
+			gpio_set_pin_low(a.pin.response);
+			vTaskDelay(1);
 			gpio_set_pin_high(a.pin.response);
 		}
 	}
@@ -151,11 +152,12 @@ static void responseTask_D(void* args){
 	
 	while(1){
 		if(gpio_pin_is_low(a.pin.test)){
-			gpio_set_pin_low(a.pin.response);
-			vTaskDelay(1);
 			if (a.pin.test == TEST_C){
 				busy_delay_ms(3);
 			}
+			
+			gpio_set_pin_low(a.pin.response);
+			vTaskDelay(1);
 			gpio_set_pin_high(a.pin.response);
 		} else {
 			vTaskDelay(1);
@@ -180,8 +182,8 @@ static void task_E(void* args){
 int main(){
 	init();
         
-	xTaskCreate(taskFn, "", 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
-	//task_C(NULL);
+	//xTaskCreate(taskFn, "", 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
+	task_E(NULL);
 	
 	// Start the scheduler, anything after this will not run.
 	vTaskStartScheduler();
