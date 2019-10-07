@@ -101,13 +101,14 @@ struct responseTaskArgs {
 	// other args ...
 };
 
-static void responseTask(void* args){
+static void responseTask_B(void* args){
 	struct responseTaskArgs a = *(struct responseTaskArgs*)args;
+	
 	while(1){
 		if(gpio_pin_is_low(a.pin.test)){
 			gpio_set_pin_low(a.pin.response);
-			vTaskDelay(1);
-			//busy_wait_short();
+			//vTaskDelay(1);
+			busy_delay_short();
 			gpio_set_pin_high(a.pin.response);
 		}
 	}
@@ -115,24 +116,72 @@ static void responseTask(void* args){
 
 
 static void task_B(void* args){
-	xTaskCreate(responseTask, "Test_A", 1024, (&(struct responseTaskArgs){{TEST_A, RESPONSE_A}}), tskIDLE_PRIORITY + 1, NULL);
-	xTaskCreate(responseTask, "Test_B", 1024, (&(struct responseTaskArgs){{TEST_B, RESPONSE_B}}), tskIDLE_PRIORITY + 1, NULL);
-	xTaskCreate(responseTask, "Test_C", 1024, (&(struct responseTaskArgs){{TEST_C, RESPONSE_C}}), tskIDLE_PRIORITY + 1, NULL);
+	xTaskCreate(responseTask_B, "Test_A", 1024, (&(struct responseTaskArgs){{TEST_A, RESPONSE_A}}), tskIDLE_PRIORITY + 1, NULL);
+	xTaskCreate(responseTask_B, "Test_B", 1024, (&(struct responseTaskArgs){{TEST_B, RESPONSE_B}}), tskIDLE_PRIORITY + 1, NULL);
+	xTaskCreate(responseTask_B, "Test_C", 1024, (&(struct responseTaskArgs){{TEST_C, RESPONSE_C}}), tskIDLE_PRIORITY + 1, NULL);
 }
 // Task C
+static void responseTask_C(void* args){
+	struct responseTaskArgs a = *(struct responseTaskArgs*)args;
+	
+	while(1){
+		printf("PIN: %d \n\r", a.pin.test);
+		//printf("PIN C !!: %d \n\r", TEST_C);
+		if(gpio_pin_is_low(a.pin.test)){
+			gpio_set_pin_low(a.pin.response);
+			vTaskDelay(1);
+			if (a.pin.test == TEST_C){
+				busy_delay_ms(3);
+			}
+			gpio_set_pin_high(a.pin.response);
+		}
+	}
+}
 
+
+static void task_C(void* args){
+	xTaskCreate(responseTask_C, "Test_A", 1024, (&(struct responseTaskArgs){{TEST_A, RESPONSE_A}}), tskIDLE_PRIORITY + 1, NULL);
+	xTaskCreate(responseTask_C, "Test_B", 1024, (&(struct responseTaskArgs){{TEST_B, RESPONSE_B}}), tskIDLE_PRIORITY + 1, NULL);
+	xTaskCreate(responseTask_C, "Test_C", 1024, (&(struct responseTaskArgs){{TEST_C, RESPONSE_C}}), tskIDLE_PRIORITY + 1, NULL);
+}
 
 // Task D
+static void responseTask_D(void* args){
+	struct responseTaskArgs a = *(struct responseTaskArgs*)args;
+	
+	while(1){
+		if(gpio_pin_is_low(a.pin.test)){
+			gpio_set_pin_low(a.pin.response);
+			vTaskDelay(1);
+			if (a.pin.test == TEST_C){
+				busy_delay_ms(3);
+			}
+			gpio_set_pin_high(a.pin.response);
+		} else {
+			vTaskDelay(1);
+		}
+	}
+}
 
+static void task_D(void* args){
+	xTaskCreate(responseTask_D, "Test_A", 1024, (&(struct responseTaskArgs){{TEST_A, RESPONSE_A}}), tskIDLE_PRIORITY + 1, NULL);
+	xTaskCreate(responseTask_D, "Test_B", 1024, (&(struct responseTaskArgs){{TEST_B, RESPONSE_B}}), tskIDLE_PRIORITY + 1, NULL);
+	xTaskCreate(responseTask_D, "Test_C", 1024, (&(struct responseTaskArgs){{TEST_C, RESPONSE_C}}), tskIDLE_PRIORITY + 1, NULL);
+}
 
 // Task E
+static void task_E(void* args){
+	xTaskCreate(responseTask_D, "Test_A", 1024, (&(struct responseTaskArgs){{TEST_A, RESPONSE_A}}), tskIDLE_PRIORITY + 3, NULL);
+	xTaskCreate(responseTask_D, "Test_B", 1024, (&(struct responseTaskArgs){{TEST_B, RESPONSE_B}}), tskIDLE_PRIORITY + 2, NULL);
+	xTaskCreate(responseTask_D, "Test_C", 1024, (&(struct responseTaskArgs){{TEST_C, RESPONSE_C}}), tskIDLE_PRIORITY + 1, NULL);
+}
 
 
 int main(){
 	init();
         
-	//xTaskCreate(taskFn, "", 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
-	task_B(NULL);
+	xTaskCreate(taskFn, "", 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
+	//task_C(NULL);
 	
 	// Start the scheduler, anything after this will not run.
 	vTaskStartScheduler();
