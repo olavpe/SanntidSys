@@ -69,12 +69,71 @@ static void taskFn(void* args){
 	}
 }
 
+// Task A
+
+static void blink_led0(void* args){
+	const portTickType delay = 200 / portTICK_RATE_MS;
+	while(1){
+		gpio_toggle_pin(LED0_GPIO);
+		vTaskDelay(delay);
+	}
+}
+
+static void blink_led1(void* args){
+	const portTickType delay = 500 / portTICK_RATE_MS;
+	while(1){
+		gpio_toggle_pin(LED1_GPIO);
+		vTaskDelay(delay);
+	}
+}
+
+static void task_A(void* args){
+	xTaskCreate(blink_led0, "LED0_TASK", 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
+	xTaskCreate(blink_led1, "LED1_TASK", 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
+}
+
+// Task B
+struct responseTaskArgs {
+	struct {
+		uint32_t test;
+		uint32_t response;
+	} pin;
+	// other args ...
+};
+
+static void responseTask(void* args){
+	struct responseTaskArgs a = *(struct responseTaskArgs*)args;
+	while(1){
+		if(gpio_pin_is_low(a.pin.test)){
+			gpio_set_pin_low(a.pin.response);
+			vTaskDelay(1);
+			//busy_wait_short();
+			gpio_set_pin_high(a.pin.response);
+		}
+	}
+}
+
+
+static void task_B(void* args){
+	xTaskCreate(responseTask, "Test_A", 1024, (&(struct responseTaskArgs){{TEST_A, RESPONSE_A}}), tskIDLE_PRIORITY + 1, NULL);
+	xTaskCreate(responseTask, "Test_B", 1024, (&(struct responseTaskArgs){{TEST_B, RESPONSE_B}}), tskIDLE_PRIORITY + 1, NULL);
+	xTaskCreate(responseTask, "Test_C", 1024, (&(struct responseTaskArgs){{TEST_C, RESPONSE_C}}), tskIDLE_PRIORITY + 1, NULL);
+}
+// Task C
+
+
+// Task D
+
+
+// Task E
+
 
 int main(){
 	init();
         
-	xTaskCreate(taskFn, "", 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
-
+	//xTaskCreate(taskFn, "", 1024, NULL, tskIDLE_PRIORITY + 1, NULL);
+	task_B(NULL);
+	
 	// Start the scheduler, anything after this will not run.
 	vTaskStartScheduler();
     
