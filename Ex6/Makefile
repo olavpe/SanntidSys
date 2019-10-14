@@ -2,7 +2,7 @@
 TARGET = testProgram
 
 # compiler flags
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -std=gnu11
 
 # linker flags
 LDFLAGS = -g -lpthread -lcomedi -lm
