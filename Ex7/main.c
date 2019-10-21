@@ -25,15 +25,16 @@ RT_TASK taskA_RT_thread_3;
 
 
 void* periodic_task(){
+	RTIME tstart = rt_timer_read();
 	while(1){
-		rt_printf("periodic print \n\r");
+		rt_printf("periodic print. Loop time: %.5f ms\n\r", (rt_timer_read() - tstart)/1000000.0);
 		rt_task_wait_period(NULL);
 	}
 }
 
 void* taskA_thread_1(void* arg) {
   set_cpu(T_CPU(0));
-  unsigned long duration = 30000000000; // 10 second timeout
+  unsigned long duration = 30000000000; // 30 second timeout
   unsigned long endTime = rt_timer_read() + duration;
 
   while(1){
@@ -50,12 +51,13 @@ void* taskA_thread_1(void* arg) {
 		rt_printf("Task failed to yield\n");
 		rt_task_delete(NULL);
 	}
+	rt_task_wait_period(NULL);
   }
 }
 
 void* taskA_thread_2(void* arg) {
   set_cpu(T_CPU(0));
-  unsigned long duration = 30000000000; // 10 second timeout
+  unsigned long duration = 30000000000; // 30 second timeout
   unsigned long endTime = rt_timer_read() + duration;
 
   while (1) {
@@ -72,12 +74,13 @@ void* taskA_thread_2(void* arg) {
 		rt_printf("Task failed to yield\n");
 		rt_task_delete(NULL);
 	}
+	rt_task_wait_period(NULL);
   }
 }
 
 void* taskA_thread_3(void* arg) {
   set_cpu(T_CPU(0));
-  unsigned long duration = 30000000000; // 10 second timeout
+  unsigned long duration = 30000000000; // 30 second timeout
   unsigned long endTime = rt_timer_read() + duration;
 
   while (1){
@@ -94,6 +97,7 @@ void* taskA_thread_3(void* arg) {
 		rt_printf("Task failed to yield\n");
 		rt_task_delete(NULL);
 	}
+	rt_task_wait_period(NULL);
   }
 }
 
@@ -109,29 +113,35 @@ int main(){
 	mlockall(MCL_CURRENT|MCL_FUTURE);
 	rt_print_auto_init(1);
 
+	/*
 	pthread_t disturbance[10];
 
   	for (int i = 0; i < 10; i++){
   	    pthread_create(&disturbance[i], NULL, &disturbance_thread,NULL);
   	}
- 	
-	/*
-	rt_task_create(&periodic_RT_task, "periodic test task", 0, 50, T_CPU(0));
-	rt_task_set_periodic(&periodic_RT_task, TM_NOW, (2.67 * 1000 * 1000 * 1000));
-	rt_task_start(&periodic_RT_task, &periodic_task, NULL);
-	*/
+ 	*/
+	
+	//rt_task_create(&periodic_RT_task, "periodic test task", 0, 50, T_CPU(0));
+	//rt_task_set_periodic(&periodic_RT_task, TM_NOW, (1 * 1000 * 1000));
+	//rt_task_start(&periodic_RT_task, &periodic_task, NULL);
+	
 	rt_task_create(&taskA_RT_thread_1, "task1", 0, 50, T_CPU(0));
 	rt_task_create(&taskA_RT_thread_2, "task2", 0, 50, T_CPU(0));
 	rt_task_create(&taskA_RT_thread_3, "task3", 0, 50, T_CPU(0));
-
+	
+	rt_task_set_periodic(&taskA_RT_thread_1, TM_NOW, (1 * 1000 * 1000));
+	rt_task_set_periodic(&taskA_RT_thread_2, TM_NOW, (1 * 1000 * 1000));
+	rt_task_set_periodic(&taskA_RT_thread_3, TM_NOW, (1 * 1000 * 1000));
+	
 	rt_task_start(&taskA_RT_thread_1, &taskA_thread_1, NULL);
 	rt_task_start(&taskA_RT_thread_2, &taskA_thread_2, NULL);
 	rt_task_start(&taskA_RT_thread_3, &taskA_thread_3, NULL);
-	//while(1){};
-	
+	while(1){};
+	/*
   	for (int i = 0; i < 10; i++){
    	 pthread_join(disturbance[i],NULL);
  	}
+ 	*/
   
 	return 0;
 }
