@@ -4,6 +4,7 @@
 #include <native/task.h>
 #include <native/timer.h>
 #include <native/sem.h>
+#include <native/mutex.h>
 #include <sys/mman.h>
 #include <rtdk.h>
 #include <sched.h>
@@ -23,6 +24,7 @@ RT_TASK taskA_RT_thread_1;
 RT_TASK taskA_RT_thread_2;
 RT_TASK taskA_RT_thread_3;
 RT_TASK taskA_RT_thread_4;
+RT_MUTEX mutex;
 RT_SEM semaphore;
 
 void busy_wait_us(unsigned long delay){
@@ -53,13 +55,12 @@ void* taskA_thread_1(void* arg) {
 
   // Low priority task that locks the resource
   rt_printf("Task1 locking semaphore\n");
-  rt_sem_p(&semaphore,TM_INFINITE);
+  rt_mutex_acquire(&mutex,TM_INFINITE);
   rt_printf("Task1 busy wait start\n");
   busy_wait_us(300000);
   rt_printf("Task1 busy wait stopped\n");
-  rt_sem_v(&semaphore);
-  rt_printf("Task1 releasing semaphore\n");
-  rt_sem_p(&semaphore,TM_INFINITE);
+  rt_mutex_release(&mutex);
+  rt_printf("Task1 releasing mutex\n");
 }
 
 void* taskA_thread_2(void* arg) {
@@ -89,10 +90,10 @@ void* taskA_thread_3(void* arg) {
 
   // Medium priority 
   rt_task_sleep(200000000);
-  rt_sem_p(&semaphore,TM_INFINITE);
+  rt_mutex_acquire(&mutex,TM_INFINITE);
   rt_printf("Task3 busy wait start\n");
   busy_wait_us(200000);
-  rt_sem_v(&semaphore);
+  rt_mutex_release(&mutex);
   rt_printf("Task3 busy wait stopped\n");
 }
 
@@ -109,6 +110,9 @@ void* taskA_thread_4(void* arg) {
   rt_sem_broadcast(&semaphore);
 //  rt_sem_delete(&semaphore);
   rt_printf("Semaphore has been synchronized\n\r");
+  rt_task_sleep(500000000000);
+  rt_sem_delete(&semaphore);
+  rt_mutex_delete(&mutex);
 }
 
 void* disturbance_thread(void* arg){
@@ -122,7 +126,9 @@ int main(){
 	mlockall(MCL_CURRENT|MCL_FUTURE);
 	rt_print_auto_init(1);
 	int err;
+	int err_mut;
 	err = rt_sem_create(&semaphore,"MySempahore", 1, S_FIFO);
+	err_mut = rt_mutex_create(&mutex,"MyMutex");
 
 	/*
 	pthread_t disturbance[10];
